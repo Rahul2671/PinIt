@@ -17,8 +17,12 @@ function NoticeCard({ title, category, community, description }) {
         {description}
       </p>
 
+      <p className="text-sm text-gray-400 mt-2">
+        Posted 2 days ago
+      </p>
+
       <button className="mt-4 px-3 py-1 bg-blue-600 text-white rounded">
-        👍 Upvote
+        👍 12
       </button>
     </div>
   );
