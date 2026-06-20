@@ -402,10 +402,9 @@ View Event
 
 
 
-{category==="Lost & Found" && isOwner &&
+{isTeamFinder && isOwner &&
 
 <>
-
 
 <button
 
@@ -419,7 +418,8 @@ className="btn-secondary"
 >
 👥 Interested ({interests})
 </button>
-  
+
+
 <button
 
 onClick={(e)=>{
@@ -437,8 +437,6 @@ className="btn-secondary"
 Share WhatsApp
 
 </button>
-
-
 
 
 <button
