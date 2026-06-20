@@ -166,28 +166,9 @@ const token=localStorage.getItem("token");
 
 try{
 
-if(interested){
-
-await axios.delete(
-`${import.meta.env.VITE_API_URL}/api/notices/${id}/interest`,
-{
-headers:{
-Authorization:`Bearer ${token}`
-}
-}
-);
-
-
-setInterested(false);
-setInterests(p=>p-1);
-
-alert("Interest removed");
-
-
-}else{
-
 
 await axios.post(
+
 `${import.meta.env.VITE_API_URL}/api/notices/${id}/interest`,
 {},
 {
@@ -195,29 +176,41 @@ headers:{
 Authorization:`Bearer ${token}`
 }
 }
+
 );
 
 
-setInterested(true);
 setInterests(p=>p+1);
 
-alert("Interest sent");
+setInterested(true);
 
-}
+alert("Interest sent");
 
 
 }catch(error){
 
+
 console.log(error.response?.data);
-  
+
+
+if(error.response?.data?.message==="Already interested"){
+  setInterested(true);
+  alert("Already interested");
+  return;
+}
+
+
 alert(
 error.response?.data?.message ||
 "Failed"
 );
 
+
 }
 
 };
+
+
 
 
 
@@ -496,13 +489,13 @@ expressInterest()
 
 className={
 interested
-? "btn-danger"
+? "btn-secondary"
 : "btn-primary"
 }
   
 >
 
-{interested ? "Undo Interest" : "Interested"}
+{interested ? "✓ Interested" : "Interested"}
 
 </button>
 
