@@ -36,7 +36,6 @@ router.post(
 // GET ALL NOTICES
 router.get(
   "/",
-  authMiddleware,
   getNotices
 );
 
