@@ -207,6 +207,8 @@ alert("Interest sent");
 
 }catch(error){
 
+console.log(error.response?.data);
+  
 alert(
 error.response?.data?.message ||
 "Failed"
