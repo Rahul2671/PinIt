@@ -32,7 +32,8 @@ team_status,
 interest_count,
 poster_name,
 poster_email,
-
+has_interested, 
+  
 }=notice;
 
 
@@ -41,7 +42,7 @@ const [upvotes,setUpvotes]=useState(Number(initialUpvotes)||0);
 
 const [interests,setInterests]=useState(Number(interest_count)||0);
 
-const [interested,setInterested]=useState(false);
+const [interested,setInterested]=useState(Boolean(has_interested));
 
 const [status,setStatus]=useState(team_status || "open");
 
