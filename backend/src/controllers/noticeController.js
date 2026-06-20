@@ -5,12 +5,17 @@ const noticeSelect = `
     notices.*,
     users.name AS poster_name,
     users.email AS poster_email,
+
     COUNT(DISTINCT upvotes.id) AS upvotes,
-    COUNT(DISTINCT team_interests.id) AS interest_count
-  FROM notices
-  LEFT JOIN users ON notices.user_id = users.id
-  LEFT JOIN upvotes ON notices.id = upvotes.notice_id
-  LEFT JOIN team_interests ON notices.id = team_interests.notice_id
+
+    COUNT(DISTINCT team_interests.id) AS interest_count,
+
+    EXISTS(
+      SELECT 1
+      FROM team_interests ti
+      WHERE ti.notice_id = notices.id
+      AND ti.user_id = NULLIF(current_setting('app.user_id', true),'')::int
+    ) AS has_interested
 `;
 
 const noticeGroupBy = `
@@ -101,53 +106,17 @@ const getNotices = async(req,res)=>{
 
 try{
 
-const user_id = req.user ? req.user.id : 0;
+const user_id = req.user?.id || null;
 
 
 const result =
 await db.query(
 `
-SELECT
-notices.*,
-users.name AS poster_name,
-users.email AS poster_email,
-COUNT(DISTINCT upvotes.id) AS upvotes,
-COUNT(DISTINCT team_interests.id) AS interest_count,
-
-CASE 
-WHEN EXISTS(
- SELECT 1
- FROM team_interests ti
- WHERE ti.notice_id = notices.id
- AND ti.user_id = $1
-)
-THEN true
-ELSE false
-END AS has_interested
-
-FROM notices
-
-LEFT JOIN users 
-ON notices.user_id = users.id
-
-LEFT JOIN upvotes 
-ON notices.id = upvotes.notice_id
-
-LEFT JOIN team_interests 
-ON notices.id = team_interests.notice_id
-
-
-GROUP BY 
-notices.id,
-users.name,
-users.email
-
-ORDER BY notices.created_at DESC
-
+${noticeSelect}
+WHERE 1=1
+${noticeGroupBy}
 `,
-[
-user_id
-]
+[user_id]
 );
 
 
@@ -155,8 +124,6 @@ res.json(result.rows);
 
 
 }catch(error){
-
-console.log(error);
 
 res.status(500).json({
 message:error.message
