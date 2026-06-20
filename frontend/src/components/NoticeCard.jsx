@@ -404,45 +404,36 @@ View Event
 
 {isTeamFinder && isOwner &&
 
-<>
-
 <button
-
 onClick={(e)=>{
 e.stopPropagation();
 fetchInterests();
 }}
-
 className="btn-secondary"
-
 >
 👥 Interested ({interests})
 </button>
 
+}
+
+
+{category==="Lost & Found" && isOwner &&
+
+<>
 
 <button
-
 onClick={(e)=>{
-
 e.stopPropagation();
-
 setShowShare(true)
-
 }}
-
 className="btn-secondary"
-
 >
-
 Share WhatsApp
-
 </button>
 
 
 <button
-
 onClick={(e)=>{
-
 e.stopPropagation();
 
 showReplies 
@@ -450,21 +441,14 @@ showReplies
 : fetchReplies();
 
 }}
-
 className="btn-secondary"
-
 >
-
 {showReplies ? "Hide Replies" : "💬 Replies"}
-
 </button>
 
 </>
 
 }
-
-
-
 
 
 
