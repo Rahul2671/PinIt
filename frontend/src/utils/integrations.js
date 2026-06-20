@@ -183,14 +183,22 @@ export function openContactLink(contactInfo, message) {
   }
 
   if (trimmed.includes("@")) {
-    window.open(
-      `mailto:${trimmed}?subject=${encodeURIComponent(
-        "PinIt Team Finder"
-      )}&body=${encodeURIComponent(message)}`,
-      "_blank"
+
+    const subject = encodeURIComponent(
+      "PinIt Team Finder"
     );
+
+    const body = encodeURIComponent(message);
+
+
+    window.open(
+      `https://mail.google.com/mail/?view=cm&fs=1&to=${trimmed}&su=${subject}&body=${body}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+
     return true;
-  }
+}
 
   if (trimmed.startsWith("http")) {
     window.open(trimmed, "_blank", "noopener,noreferrer");
