@@ -8,6 +8,7 @@ const {
   upvoteNotice,
   getMyNotices,
   expressInterest,
+  removeInterest,
   getNoticeInterests,
   updateTeamStatus,
   addReply,
@@ -82,6 +83,11 @@ router.post(
   expressInterest
 );
 
+router.delete(
+ "/:id/interest",
+ authMiddleware,
+ removeInterest
+);
 
 
 // OWNER VIEW INTERESTS
