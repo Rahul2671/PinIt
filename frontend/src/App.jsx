@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import CreateNotice from "./pages/CreateNotice";
 import Profile from "./pages/Profile";
 import MyNotices from "./pages/MyNotices";
+import NoticeDetail from "./pages/NoticeDetail";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -59,6 +60,9 @@ function App() {
             />
 
             <Route path="*" element={<Navigate to="/" />} />
+
+            <Route path="/notice/:id" element={<NoticeDetail />} />
+            
           </Routes>
         </main>
 

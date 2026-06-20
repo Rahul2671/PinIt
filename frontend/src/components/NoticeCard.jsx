@@ -1,304 +1,737 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ShareModal from "./ShareModal";
+import ReplyModal from "./ReplyModal";
+
 import {
   openEventHub,
   openContactLink,
-  TEAM_INTENT_LABELS,
-  EVENT_HUB_URL,
 } from "../utils/integrations";
+
 import { getAuthUserId } from "../utils/auth";
 
-function NoticeCard({ notice, refresh, showActions = true }) {
-  const {
-    id,
-    user_id,
-    title,
-    category,
-    community,
-    description,
-    upvotes: initialUpvotes,
-    is_team_finder,
-    team_intent,
-    event_name,
-    event_type,
-    roles_needed,
-    team_size_needed,
-    contact_info,
-    event_hub_url,
-    team_status,
-    interest_count,
-    poster_name,
-    poster_email,
-  } = notice;
 
-  const [upvotes, setUpvotes] = useState(Number(initialUpvotes) || 0);
-  const [interests, setInterests] = useState(Number(interest_count) || 0);
-  const [status, setStatus] = useState(team_status || "open");
-  const [showInterestedList, setShowInterestedList] = useState(false);
-  const [interestedUsers, setInterestedUsers] = useState([]);
-  const [loadingInterests, setLoadingInterests] = useState(false);
+function NoticeCard({ notice, refresh }) {
 
-  // ✅ NEW: Share modal state
-  const [showShare, setShowShare] = useState(false);
+const navigate = useNavigate();
 
-  const currentUserId = getAuthUserId();
-  const isOwner = currentUserId && user_id === currentUserId;
-  const isTeamFinder = Boolean(is_team_finder);
-  const isTeamFull = status === "full";
 
-  const contactMessage = isTeamFinder
-    ? `Hi! I saw your PinIt team finder post for "${event_name}" and I'm interested.`
-    : `Hi! I'm reaching out about your PinIt notice: "${title}".`;
+const {
+id,
+user_id,
+title,
+category,
+community,
+description,
+upvotes: initialUpvotes,
+is_team_finder,
+event_name,
+event_type,
+team_status,
+interest_count,
+poster_name,
+poster_email,
 
-  const deleteNotice = async () => {
-  const token = localStorage.getItem("token");
+}=notice;
 
-  if (!token) {
-    alert("Please login first");
-    return;
-  }
 
-  try {
-    const res = await axios.delete(
-      `${import.meta.env.VITE_API_URL}/api/notices/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
 
-    alert(res.data?.message || "Notice deleted 🚀");
+const [upvotes,setUpvotes]=useState(Number(initialUpvotes)||0);
 
-    if (refresh) refresh();
-  } catch (error) {
-    console.log(error);
-    alert(error.response?.data?.message || "Delete failed");
-  }
+const [interests,setInterests]=useState(Number(interest_count)||0);
+
+const [status,setStatus]=useState(team_status || "open");
+
+
+const [showShare,setShowShare]=useState(false);
+
+const [showReply,setShowReply]=useState(false);
+
+
+// NEW
+const [showReplies,setShowReplies]=useState(false);
+const [replies,setReplies]=useState([]);
+
+
+
+
+const currentUserId=getAuthUserId();
+
+
+const isOwner =
+currentUserId &&
+Number(user_id)===Number(currentUserId);
+
+
+
+const isTeamFinder=Boolean(is_team_finder);
+
+const isTeamFull=status==="full";
+
+
+
+
+
+
+const deleteNotice=async()=>{
+
+const token=localStorage.getItem("token");
+
+
+try{
+
+await axios.delete(
+`${import.meta.env.VITE_API_URL}/api/notices/${id}`,
+{
+headers:{
+Authorization:`Bearer ${token}`
+}
+}
+);
+
+
+refresh?.();
+
+
+}catch(error){
+
+alert(
+error.response?.data?.message ||
+"Delete failed"
+);
+
+}
+
 };
 
-  const upvoteNotice = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please login to upvote");
-      return;
-    }
 
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/notices/${id}/upvote`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setUpvotes((prev) => prev + 1);
-    } catch (error) {
-      if (error.response?.status === 400) {
-        alert("Already upvoted 👍");
-      } else {
-        console.log(error);
-        alert("Something went wrong");
-      }
-    }
-  };
 
-  const expressInterest = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please login to express interest");
-      return;
-    }
 
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/notices/${id}/interest`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setInterests((prev) => prev + 1);
-      alert("Interest sent!");
-    } catch (error) {
-      alert(error.response?.data?.message || "Could not express interest");
-    }
-  };
 
-  const fetchInterestedUsers = async () => {
-    setLoadingInterests(true);
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/notices/${id}/interests`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      setInterestedUsers(res.data);
-      setShowInterestedList(true);
-    } catch (error) {
-      alert(error.response?.data?.message || "Could not load interested users");
-    } finally {
-      setLoadingInterests(false);
-    }
-  };
 
-  const toggleTeamStatus = async () => {
-    const newStatus = status === "open" ? "full" : "open";
-    try {
-      await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/notices/${id}/team-status`,
-        { team_status: newStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      setStatus(newStatus);
-    } catch (error) {
-      alert(error.response?.data?.message || "Could not update team status");
-    }
-  };
+const upvoteNotice=async()=>{
 
-  const handleContact = () => {
-    const contact = contact_info || poster_email;
-    if (openContactLink(contact, contactMessage)) return;
-    alert(`Contact: ${contact || "Not provided"}`);
-  };
 
-  return (
-    <article className="card card-hover flex h-full flex-col">
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-semibold text-slate-900">
-            {title}
-          </h2>
+const token=localStorage.getItem("token");
 
-          {isTeamFinder && (
-            <p className="mt-1 text-sm font-medium text-violet-600">
-              {event_name}
-              {event_type ? ` · ${event_type}` : ""}
-            </p>
-          )}
-        </div>
 
-        <div className="flex flex-wrap gap-2">
-          <span className="badge-indigo">{category}</span>
-
-          {isTeamFinder && (
-            <span className="badge bg-violet-50 text-violet-700">
-              Team finder
-            </span>
-          )}
-
-          {isTeamFinder && isTeamFull && (
-            <span className="badge bg-slate-100 text-slate-600">
-              Team full
-            </span>
-          )}
-
-          <span className="badge-emerald">{community}</span>
-        </div>
-      </div>
-
-      {/* Description */}
-      <p className="mt-4 flex-1 text-sm text-slate-600">
-        {description}
-      </p>
-
-      {/* Actions */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        {category === "Events" && (
-          <button
-            onClick={() => openEventHub(event_hub_url)}
-            className="btn-secondary px-3 py-2 text-xs sm:text-sm"
-          >
-            View Event
-          </button>
-        )}
-
-        {/* 🔥 UPDATED SHARE BUTTON */}
-        {category === "Lost & Found" && (
-          <button
-            onClick={() => setShowShare(true)}
-            className="btn-secondary px-3 py-2 text-xs sm:text-sm"
-          >
-            Share to WhatsApp
-          </button>
-        )}
-
-        {isTeamFinder && !isOwner && !isTeamFull && (
-          <>
-            <button
-              onClick={expressInterest}
-              className="btn-primary px-3 py-2 text-xs sm:text-sm"
-            >
-              I'm interested
-            </button>
-
-            <button
-              onClick={handleContact}
-              className="btn-secondary px-3 py-2 text-xs sm:text-sm"
-            >
-              Contact
-            </button>
-          </>
-        )}
-
-        {isTeamFinder && isOwner && (
-          <>
-            <button
-              onClick={fetchInterestedUsers}
-              className="btn-secondary px-3 py-2 text-xs sm:text-sm"
-            >
-              View ({interests})
-            </button>
-
-            <button
-              onClick={toggleTeamStatus}
-              className="btn-secondary px-3 py-2 text-xs sm:text-sm"
-            >
-              Mark {status === "open" ? "full" : "open"}
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* Interested list */}
-      {showInterestedList && (
-        <div className="mt-4 rounded-lg bg-slate-50 p-3">
-          {interestedUsers.map((u) => (
-            <div key={u.id} className="flex justify-between text-sm">
-              <span>{u.name}</span>
-              <span className="text-slate-500">{u.email}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="mt-4 flex justify-between border-t pt-3">
-        <button onClick={upvoteNotice} className="text-sm">
-          👍 {upvotes}
-        </button>
-
-        {isOwner && (
-          <button onClick={deleteNotice} className="text-sm text-red-500">
-            Delete
-          </button>
-        )}
-      </div>
-
-      {/* 🚀 SHARE MODAL INTEGRATION */}
-      {showShare && (
-        <ShareModal
-          notice={notice}
-          onClose={() => setShowShare(false)}
-        />
-      )}
-    </article>
-  );
+if(!token){
+alert("Login required");
+return;
 }
+
+
+try{
+
+
+await axios.post(
+
+`${import.meta.env.VITE_API_URL}/api/notices/${id}/upvote`,
+{},
+{
+headers:{
+Authorization:`Bearer ${token}`
+}
+}
+
+);
+
+
+setUpvotes(p=>p+1);
+
+
+
+}catch(error){
+
+
+if(error.response?.status===400)
+alert("Already upvoted");
+
+
+}
+
+};
+
+
+
+
+
+
+
+const expressInterest=async()=>{
+
+
+const token=localStorage.getItem("token");
+
+
+try{
+
+
+await axios.post(
+
+`${import.meta.env.VITE_API_URL}/api/notices/${id}/interest`,
+{},
+{
+headers:{
+Authorization:`Bearer ${token}`
+}
+}
+
+);
+
+
+setInterests(p=>p+1);
+
+alert("Interest sent");
+
+
+}catch(error){
+
+alert(
+error.response?.data?.message ||
+"Failed"
+);
+
+}
+
+
+};
+
+
+
+
+
+
+const contactUser=(email,name)=>{
+
+
+openContactLink(
+email,
+`Hi ${name}, regarding PinIt notice "${title}"`
+);
+
+
+};
+
+
+
+
+
+
+
+// NEW FETCH REPLIES
+
+const fetchReplies=async()=>{
+
+
+try{
+
+
+const res=await axios.get(
+
+`${import.meta.env.VITE_API_URL}/api/notices/${id}/replies`,
+
+{
+headers:{
+Authorization:
+`Bearer ${localStorage.getItem("token")}`
+}
+}
+
+);
+
+
+setReplies(res.data);
+
+setShowReplies(true);
+
+
+
+}catch(error){
+
+alert(
+error.response?.data?.message ||
+"Could not load replies"
+);
+
+}
+
+
+};
+
+
+
+
+
+
+
+return (
+
+
+<article
+
+onClick={()=>navigate(`/notice/${id}`)}
+
+className="card card-hover flex h-full flex-col cursor-pointer"
+
+>
+
+
+
+<div className="flex justify-between gap-3">
+
+
+<div>
+
+<h2 className="text-lg font-semibold">
+
+{title}
+
+</h2>
+
+
+{isTeamFinder &&
+
+<p className="text-violet-600 text-sm">
+
+{event_name}
+
+{event_type ? ` · ${event_type}`:""}
+
+</p>
+
+}
+
+
+</div>
+
+
+
+<div className="flex gap-2">
+
+
+<span className="badge-indigo">
+
+{category}
+
+</span>
+
+
+<span className="badge-emerald">
+
+{community}
+
+</span>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<p className="mt-4 flex-1 text-sm text-slate-600">
+
+{description}
+
+</p>
+
+
+
+
+
+
+
+<div className="mt-4 flex flex-wrap gap-2">
+
+
+
+
+
+{category==="Events" &&
+
+<button
+
+onClick={(e)=>{
+
+e.stopPropagation();
+
+openEventHub(notice.event_hub_url)
+
+}}
+
+className="btn-secondary"
+
+>
+
+View Event
+
+</button>
+
+}
+
+
+
+
+
+
+{category==="Lost & Found" && isOwner &&
+
+<>
+
+<button
+
+onClick={(e)=>{
+
+e.stopPropagation();
+
+setShowShare(true)
+
+}}
+
+className="btn-secondary"
+
+>
+
+Share WhatsApp
+
+</button>
+
+
+
+
+<button
+
+onClick={(e)=>{
+
+e.stopPropagation();
+
+showReplies 
+? setShowReplies(false)
+: fetchReplies();
+
+}}
+
+className="btn-secondary"
+
+>
+
+{showReplies ? "Hide Replies" : "💬 Replies"}
+
+</button>
+
+</>
+
+}
+
+
+
+
+
+
+
+{category==="Lost & Found" && !isOwner &&
+
+
+<button
+
+onClick={(e)=>{
+
+e.stopPropagation();
+
+setShowReply(true)
+
+}}
+
+className="btn-secondary"
+
+>
+
+💬 Reply
+
+</button>
+
+
+}
+
+
+
+
+
+
+{isTeamFinder && !isOwner && !isTeamFull &&
+
+
+<button
+
+onClick={(e)=>{
+
+e.stopPropagation();
+
+expressInterest()
+
+}}
+
+className="btn-primary"
+
+>
+
+Interested
+
+</button>
+
+
+}
+
+
+
+
+
+{isTeamFinder && !isOwner &&
+
+
+<button
+
+onClick={(e)=>{
+
+e.stopPropagation();
+
+contactUser(
+poster_email,
+poster_name
+)
+
+}}
+
+className="btn-secondary"
+
+>
+
+Contact
+
+</button>
+
+
+}
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+{/* REPLIES VIEW */}
+
+
+{showReplies &&
+
+
+<div
+
+onClick={(e)=>e.stopPropagation()}
+
+className="mt-4 rounded-lg bg-slate-50 p-3"
+
+>
+
+
+<h3 className="font-semibold mb-2">
+
+Replies
+
+</h3>
+
+
+
+
+{
+replies.length===0 &&
+
+<p className="text-sm text-slate-500">
+
+No replies yet
+
+</p>
+
+}
+
+
+
+
+{
+
+replies.map(reply=>(
+
+
+<div
+
+key={reply.id}
+
+className="border-b py-2"
+
+>
+
+
+<p className="font-medium text-sm">
+
+{reply.name}
+
+</p>
+
+
+
+<p className="text-sm text-slate-600">
+
+{reply.message}
+
+</p>
+
+
+
+
+<button
+
+onClick={()=>contactUser(reply.email,reply.name)}
+
+className="btn-secondary text-xs mt-2"
+
+>
+
+Contact
+
+</button>
+
+
+
+</div>
+
+
+))
+
+}
+
+
+
+</div>
+
+
+}
+
+
+
+
+
+
+
+
+
+
+<div className="mt-4 flex justify-between border-t pt-3">
+
+
+<button
+
+onClick={(e)=>{
+
+e.stopPropagation();
+
+upvoteNotice()
+
+}}
+
+>
+
+👍 {upvotes}
+
+</button>
+
+
+
+
+
+{isOwner &&
+
+<button
+
+onClick={(e)=>{
+
+e.stopPropagation();
+
+deleteNotice()
+
+}}
+
+className="text-red-500"
+
+>
+
+Delete
+
+</button>
+
+}
+
+
+</div>
+
+
+
+
+
+
+
+
+{showShare &&
+
+<ShareModal
+
+notice={notice}
+
+onClose={()=>setShowShare(false)}
+
+/>
+
+}
+
+
+
+
+
+
+
+{showReply &&
+
+<ReplyModal
+
+noticeId={id}
+
+onClose={()=>setShowReply(false)}
+
+/>
+
+}
+
+
+
+
+
+</article>
+
+
+);
+
+
+}
+
 
 export default NoticeCard;
