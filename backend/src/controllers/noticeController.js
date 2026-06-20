@@ -5,17 +5,8 @@ const noticeSelect = `
     notices.*,
     users.name AS poster_name,
     users.email AS poster_email,
-
     COUNT(DISTINCT upvotes.id) AS upvotes,
-
-    COUNT(DISTINCT team_interests.id) AS interest_count,
-
-    EXISTS(
-      SELECT 1
-      FROM team_interests ti
-      WHERE ti.notice_id = notices.id
-      AND ti.user_id = NULLIF(current_setting('app.user_id', true),'')::int
-    ) AS has_interested
+    COUNT(DISTINCT team_interests.id) AS interest_count
 `;
 
 const noticeGroupBy = `
