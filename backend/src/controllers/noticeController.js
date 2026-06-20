@@ -390,9 +390,52 @@ message:error.message
 
 
 
+// REMOVE TEAM INTEREST
+const removeInterest = async(req,res)=>{
+
+try{
+
+const notice_id=req.params.id;
+const user_id=req.user.id;
 
 
+const result = await db.query(
+`
+DELETE FROM team_interests
+WHERE notice_id=$1
+AND user_id=$2
+RETURNING *
+`,
+[
+notice_id,
+user_id
+]
+);
 
+
+if(result.rows.length===0){
+
+return res.status(400).json({
+message:"Interest not found"
+});
+
+}
+
+
+res.json({
+message:"Interest removed"
+});
+
+
+}catch(error){
+
+res.status(500).json({
+message:error.message
+});
+
+}
+
+};
 
 
 // OWNER VIEW INTERESTS
@@ -728,6 +771,7 @@ getMyNotices,
 deleteNotice,
 upvoteNotice,
 expressInterest,
+removeInterest,
 getNoticeInterests,
 addReply,
 getReplies,
