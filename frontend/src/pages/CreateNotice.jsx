@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
 import {
-  shareToWhatsAppGroup,
   openEventHub,
   EVENT_HUB_URL,
 } from "../utils/integrations";

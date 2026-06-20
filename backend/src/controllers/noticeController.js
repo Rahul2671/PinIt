@@ -40,10 +40,15 @@ const createNotice = async (req, res) => {
 
     if (teamFinder) {
       if (!event_name?.trim()) {
-        return res.status(400).json({ message: "Event name is required for team finder posts" });
+        return res.status(400).json({
+          message: "Event name is required for team finder posts",
+        });
       }
-      if (!team_intent || !["recruiting", "looking_to_join"].includes(team_intent)) {
-        return res.status(400).json({ message: "Valid team intent is required" });
+
+      if (!["recruiting", "looking_to_join"].includes(team_intent)) {
+        return res.status(400).json({
+          message: "Valid team intent is required",
+        });
       }
     }
 
@@ -66,8 +71,8 @@ const createNotice = async (req, res) => {
         teamFinder,
         teamFinder ? team_intent : null,
         teamFinder ? event_name : null,
-        teamFinder ? event_type || null : null,
-        teamFinder ? roles_needed || null : null,
+        teamFinder ? (event_type || null) : null,
+        teamFinder ? (roles_needed || null) : null,
         teamFinder && team_size_needed ? Number(team_size_needed) : null,
         contact_info || null,
         event_hub_url || null,
@@ -86,6 +91,30 @@ const getNotices = async (req, res) => {
     const result = await db.query(`${noticeSelect} ${noticeGroupBy}`);
     res.json(result.rows);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getNoticeById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(
+      `
+      ${noticeSelect}
+      WHERE notices.id = $1
+      ${noticeGroupBy}
+      `,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Notice not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -113,11 +142,26 @@ const getMyNotices = async (req, res) => {
 const deleteNotice = async (req, res) => {
   try {
     const { id } = req.params;
+    const user_id = req.user.id;
 
-    await db.query(`DELETE FROM notices WHERE id = $1`, [id]);
+    const result = await db.query(
+      `
+      DELETE FROM notices
+      WHERE id = $1 AND user_id = $2
+      RETURNING *
+      `,
+      [id, user_id]
+    );
 
-    res.json({ message: "Notice deleted" });
+    if (result.rows.length === 0) {
+      return res.status(403).json({
+        message: "Not authorized or notice not found",
+      });
+    }
+
+    res.json({ message: "Notice deleted successfully" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -160,15 +204,21 @@ const expressInterest = async (req, res) => {
     const notice = noticeResult.rows[0];
 
     if (!notice.is_team_finder) {
-      return res.status(400).json({ message: "This notice is not a team finder post" });
+      return res.status(400).json({
+        message: "This notice is not a team finder post",
+      });
     }
 
     if (notice.team_status === "full") {
-      return res.status(400).json({ message: "This team is already full" });
+      return res.status(400).json({
+        message: "This team is already full",
+      });
     }
 
     if (notice.user_id === user_id) {
-      return res.status(400).json({ message: "You cannot express interest on your own post" });
+      return res.status(400).json({
+        message: "You cannot express interest on your own post",
+      });
     }
 
     await db.query(
@@ -176,10 +226,14 @@ const expressInterest = async (req, res) => {
       [notice_id, user_id, message || null]
     );
 
-    res.status(201).json({ message: "Interest expressed successfully" });
+    res.status(201).json({
+      message: "Interest expressed successfully",
+    });
   } catch (error) {
     if (error.code === "23505") {
-      return res.status(400).json({ message: "You already expressed interest" });
+      return res.status(400).json({
+        message: "You already expressed interest",
+      });
     }
 
     res.status(500).json({ message: error.message });
@@ -206,8 +260,11 @@ const getNoticeInterests = async (req, res) => {
 
     const result = await db.query(
       `
-      SELECT team_interests.id, team_interests.message, team_interests.created_at,
-             users.name, users.email
+      SELECT team_interests.id,
+             team_interests.message,
+             team_interests.created_at,
+             users.name,
+             users.email
       FROM team_interests
       JOIN users ON team_interests.user_id = users.id
       WHERE team_interests.notice_id = $1
@@ -243,7 +300,9 @@ const updateTeamStatus = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Notice not found or not authorized" });
+      return res.status(404).json({
+        message: "Notice not found or not authorized",
+      });
     }
 
     res.json(result.rows[0]);
@@ -255,6 +314,7 @@ const updateTeamStatus = async (req, res) => {
 module.exports = {
   createNotice,
   getNotices,
+  getNoticeById,
   getMyNotices,
   deleteNotice,
   upvoteNotice,

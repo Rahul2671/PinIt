@@ -3,6 +3,7 @@ const express = require("express");
 const {
   createNotice,
   getNotices,
+  getNoticeById,
   deleteNotice,
   upvoteNotice,
   getMyNotices,
@@ -17,6 +18,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 router.post("/", authMiddleware, createNotice);
 router.get("/", getNotices);
 router.get("/my-notices", authMiddleware, getMyNotices);
+router.get("/:id",getNoticeById);
 router.delete("/:id", authMiddleware, deleteNotice);
 router.post("/:id/upvote", authMiddleware, upvoteNotice);
 router.post("/:id/interest", authMiddleware, expressInterest);
