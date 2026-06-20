@@ -32,7 +32,6 @@ team_status,
 interest_count,
 poster_name,
 poster_email,
-has_interested, 
   
 }=notice;
 
@@ -42,7 +41,7 @@ const [upvotes,setUpvotes]=useState(Number(initialUpvotes)||0);
 
 const [interests,setInterests]=useState(Number(interest_count)||0);
 
-const [interested,setInterested]=useState(Boolean(has_interested));
+const [interested,setInterested]=useState(false);
 
 const [status,setStatus]=useState(team_status || "open");
 
@@ -56,7 +55,8 @@ const [showReply,setShowReply]=useState(false);
 const [showReplies,setShowReplies]=useState(false);
 const [replies,setReplies]=useState([]);
 
-
+const [showInterests,setShowInterests]=useState(false);
+const [interestedUsers,setInterestedUsers]=useState([]);
 
 
 const currentUserId=getAuthUserId();
@@ -163,9 +163,7 @@ const expressInterest=async()=>{
 
 const token=localStorage.getItem("token");
 
-
 try{
-
 
 await axios.post(
 
@@ -179,9 +177,7 @@ Authorization:`Bearer ${token}`
 
 );
 
-
 setInterests(p=>p+1);
-
 setInterested(true);
 
 alert("Interest sent");
@@ -189,29 +185,45 @@ alert("Interest sent");
 
 }catch(error){
 
-
 console.log(error.response?.data);
-
 
 if(error.response?.data?.message==="Already interested"){
   setInterested(true);
-  alert("Already interested");
   return;
 }
-
 
 alert(
 error.response?.data?.message ||
 "Failed"
 );
 
-
 }
 
 };
 
+const fetchInterests=async()=>{
 
+try{
 
+const res=await axios.get(
+`${import.meta.env.VITE_API_URL}/api/notices/${id}/interests`,
+{
+headers:{
+Authorization:`Bearer ${localStorage.getItem("token")}`
+}
+}
+);
+
+setInterestedUsers(res.data);
+setShowInterests(true);
+
+}catch(error){
+
+console.log(error.response?.data);
+
+}
+
+};
 
 
 const contactUser=(email,name)=>{
@@ -394,6 +406,20 @@ View Event
 
 <>
 
+
+<button
+
+onClick={(e)=>{
+e.stopPropagation();
+fetchInterests();
+}}
+
+className="btn-secondary"
+
+>
+👥 Interested ({interests})
+</button>
+  
 <button
 
 onClick={(e)=>{
@@ -737,7 +763,43 @@ onClose={()=>setShowReply(false)}
 }
 
 
+{showInterests &&
 
+<div
+onClick={(e)=>e.stopPropagation()}
+className="mt-4 bg-slate-50 p-3 rounded-lg"
+>
+
+<h3 className="font-semibold">
+Interested Users
+</h3>
+
+{
+interestedUsers.map(user=>(
+
+<div key={user.id} className="py-2 border-b">
+
+<p>{user.name}</p>
+
+<p className="text-sm">
+{user.email}
+</p>
+
+<button
+onClick={()=>contactUser(user.email,user.name)}
+className="btn-secondary text-xs"
+>
+Contact
+</button>
+
+</div>
+
+))
+}
+
+</div>
+
+}
 
 
 </article>
