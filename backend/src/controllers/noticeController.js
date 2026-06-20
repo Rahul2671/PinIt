@@ -102,7 +102,25 @@ const getNotices = async(req,res)=>{
 try{
 
 const result =
-await db.query(`${noticeSelect} ${noticeGroupBy}`);
+await db.query(
+`
+${noticeSelect},
+CASE 
+WHEN EXISTS(
+ SELECT 1 
+ FROM team_interests ti
+ WHERE ti.notice_id=notices.id
+ AND ti.user_id=$1
+)
+THEN true
+ELSE false
+END AS has_interested
+${noticeGroupBy}
+`,
+[
+req.user ? req.user.id : 0
+]
+);
 
 res.json(result.rows);
 
