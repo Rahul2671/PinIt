@@ -7,6 +7,10 @@ const noticeSelect = `
     users.email AS poster_email,
     COUNT(DISTINCT upvotes.id) AS upvotes,
     COUNT(DISTINCT team_interests.id) AS interest_count
+  FROM notices
+  LEFT JOIN users ON notices.user_id = users.id
+  LEFT JOIN upvotes ON notices.id = upvotes.notice_id
+  LEFT JOIN team_interests ON notices.id = team_interests.notice_id
 `;
 
 const noticeGroupBy = `
@@ -97,24 +101,14 @@ const getNotices = async(req,res)=>{
 
 try{
 
-const user_id = req.user?.id || null;
-
-
 const result =
-await db.query(
-`
-${noticeSelect}
-WHERE 1=1
-${noticeGroupBy}
-`,
-[user_id]
-);
-
+await db.query(`${noticeSelect} ${noticeGroupBy}`);
 
 res.json(result.rows);
 
-
 }catch(error){
+
+console.log(error);
 
 res.status(500).json({
 message:error.message
@@ -123,7 +117,6 @@ message:error.message
 }
 
 };
-
 
 
 // GET SINGLE
@@ -163,8 +156,6 @@ message:error.message
 }
 
 };
-
-
 
 
 // MY NOTICES
