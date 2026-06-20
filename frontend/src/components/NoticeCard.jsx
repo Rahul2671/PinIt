@@ -41,6 +41,8 @@ const [upvotes,setUpvotes]=useState(Number(initialUpvotes)||0);
 
 const [interests,setInterests]=useState(Number(interest_count)||0);
 
+const [interested,setInterested]=useState(false);
+
 const [status,setStatus]=useState(team_status || "open");
 
 
@@ -156,20 +158,35 @@ alert("Already upvoted");
 
 
 
-
-
-
 const expressInterest=async()=>{
-
 
 const token=localStorage.getItem("token");
 
 
 try{
 
+if(interested){
+
+await axios.delete(
+`${import.meta.env.VITE_API_URL}/api/notices/${id}/interest`,
+{
+headers:{
+Authorization:`Bearer ${token}`
+}
+}
+);
+
+
+setInterested(false);
+setInterests(p=>p-1);
+
+alert("Interest removed");
+
+
+}else{
+
 
 await axios.post(
-
 `${import.meta.env.VITE_API_URL}/api/notices/${id}/interest`,
 {},
 {
@@ -177,13 +194,15 @@ headers:{
 Authorization:`Bearer ${token}`
 }
 }
-
 );
 
 
+setInterested(true);
 setInterests(p=>p+1);
 
 alert("Interest sent");
+
+}
 
 
 }catch(error){
@@ -195,11 +214,7 @@ error.response?.data?.message ||
 
 }
 
-
 };
-
-
-
 
 
 
@@ -476,11 +491,15 @@ expressInterest()
 
 }}
 
-className="btn-primary"
-
+className={
+interested
+? "btn-danger"
+: "btn-primary"
+}
+  
 >
 
-Interested
+{interested ? "Undo Interest" : "Interested"}
 
 </button>
 
