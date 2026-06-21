@@ -3,7 +3,6 @@ import axios from "axios";
 import {
   openEventHub,
   EVENT_HUB_URL,
-  shareToWhatsAppGroup,
 } from "../utils/integrations";
 
 function CreateNotice() {
