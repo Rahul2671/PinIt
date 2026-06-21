@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ShareModal from "./ShareModal";
@@ -42,7 +42,7 @@ const [upvotes,setUpvotes]=useState(Number(initialUpvotes)||0);
 
 const [interests,setInterests]=useState(Number(interest_count)||0);
 
-const [interested,setInterested]=useState(false);
+const [interested,setInterested]=useState(notice.user_interested || false);
 
 const [status,setStatus]=useState(team_status || "open");
 
@@ -73,7 +73,45 @@ const isTeamFinder=Boolean(is_team_finder);
 
 const isTeamFull=status==="full";
 
+useEffect(()=>{
 
+const checkInterest = async()=>{
+
+try{
+
+const res = await axios.get(
+`${import.meta.env.VITE_API_URL}/api/notices/${id}/interests`,
+{
+headers:{
+Authorization:`Bearer ${localStorage.getItem("token")}`
+}
+}
+);
+
+
+const exists = res.data.some(
+user => Number(user.id) === Number(currentUserId)
+);
+
+
+setInterested(exists);
+
+
+}catch(error){
+
+console.log(error);
+
+}
+
+};
+
+
+if(isTeamFinder && !isOwner){
+checkInterest();
+}
+
+
+},[]);
 
 
 
