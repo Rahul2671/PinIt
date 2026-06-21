@@ -490,6 +490,7 @@ className="btn-secondary"
 <>
 
 <button
+onMouseDown={(e)=>e.stopPropagation()}
 onClick={(e)=>{
 e.stopPropagation();
 setShowShare(true)
@@ -525,6 +526,8 @@ className="btn-secondary"
 
 
 <button
+  
+onMouseDown={(e)=>e.stopPropagation()}
 
 onClick={(e)=>{
 
@@ -816,15 +819,12 @@ Delete
 
 
 {showShare &&
-
+<div onClick={(e)=>e.stopPropagation()}>
 <ShareModal
-
 notice={notice}
-
 onClose={()=>setShowShare(false)}
-
 />
-
+</div>
 }
 
 
@@ -834,7 +834,7 @@ onClose={()=>setShowShare(false)}
 
 
 {showReply &&
-
+<div onClick={(e)=>e.stopPropagation()}>
 <ReplyModal
 
 noticeId={id}
@@ -842,7 +842,7 @@ noticeId={id}
 onClose={()=>setShowReply(false)}
 
 />
-
+</div> 
 }
 
 
