@@ -129,15 +129,11 @@ const {id}=req.params;
 const result =
 await db.query(
 `
-${noticeSelect},
-BOOL_OR(team_interests.user_id=$1) AS interested
-WHERE notices.id=$2
+${noticeSelect}
+WHERE notices.id=$1
 ${noticeGroupBy}
 `,
-[
-req.user.id,
-id
-]
+[id]
 );
 
 
@@ -151,6 +147,8 @@ res.json(result.rows[0]);
 
 
 }catch(error){
+
+console.log(error);
 
 res.status(500).json({
 message:error.message
