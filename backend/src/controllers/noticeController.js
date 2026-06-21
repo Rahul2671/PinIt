@@ -101,17 +101,8 @@ const getNotices = async(req,res)=>{
 
 try{
 
-const user_id = req.user?.id || 0;
-
 const result =
-await db.query(
-`
-${noticeSelect},
-BOOL_OR(team_interests.user_id=$1) AS interested
-${noticeGroupBy}
-`,
-[user_id]
-);
+await db.query(`${noticeSelect} ${noticeGroupBy}`);
 
 res.json(result.rows);
 
@@ -126,7 +117,6 @@ message:error.message
 }
 
 };
-
 
 // GET SINGLE
 const getNoticeById = async(req,res)=>{
