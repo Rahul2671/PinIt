@@ -362,13 +362,14 @@ return (
 
 <article
 
-onClick={()=>navigate(`/notice/${id}`)}
-
-className="card card-hover flex h-full flex-col cursor-pointer"
+className="card flex h-full flex-col"
 
 >
 
-
+<div
+onClick={()=>navigate(`/notice/${id}`)}
+className="card-hover cursor-pointer flex flex-col flex-1"
+>
 
 <div className="flex justify-between gap-3">
 
@@ -814,7 +815,7 @@ Delete
 
 
 
-
+</div>
 
 
 
