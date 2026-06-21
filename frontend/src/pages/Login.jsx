@@ -19,7 +19,7 @@ function Login() {
       );
 
       localStorage.setItem("token", response.data.token);
-      window.location.reload();
+      
       navigate("/");
     } catch (error) {
       console.log(error);
