@@ -106,7 +106,11 @@ router.patch(
   updateTeamStatus
 );
 
-
+router.patch(
+"/:id/resolve",
+authMiddleware,
+resolveNotice
+);
 
 
 // ======================
