@@ -42,7 +42,7 @@ const [upvotes,setUpvotes]=useState(Number(initialUpvotes)||0);
 
 const [interests,setInterests]=useState(Number(interest_count)||0);
 
-const [interested,setInterested]=useState(notice.user_interested || false);
+const [interested,setInterested]=useState(notice.interested || false);
 
 const [status,setStatus]=useState(team_status || "open");
 
