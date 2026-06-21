@@ -32,6 +32,7 @@ team_status,
 interest_count,
 poster_name,
 poster_email,
+notice_status,
   
 }=notice;
 
@@ -109,7 +110,36 @@ error.response?.data?.message ||
 };
 
 
+const resolveNotice=async()=>{
 
+try{
+
+await axios.patch(
+`${import.meta.env.VITE_API_URL}/api/notices/${id}/resolve`,
+{},
+{
+headers:{
+Authorization:
+`Bearer ${localStorage.getItem("token")}`
+}
+}
+);
+
+alert("Marked as resolved");
+
+refresh?.();
+
+
+}catch(error){
+
+alert(
+error.response?.data?.message ||
+"Failed"
+);
+
+}
+
+};
 
 
 
@@ -680,6 +710,39 @@ upvoteNotice()
 
 
 
+
+{isOwner && notice_status !== "resolved" &&
+
+<button
+
+onClick={(e)=>{
+
+e.stopPropagation();
+
+resolveNotice();
+
+}}
+
+className="text-green-600"
+
+>
+
+✅ Mark Found
+
+</button>
+
+}
+
+
+{isOwner && notice_status==="resolved" &&
+
+<span className="text-green-600">
+
+✔ Resolved
+
+</span>
+
+}
 
 
 {isOwner &&
