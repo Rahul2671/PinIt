@@ -14,7 +14,8 @@ const {
   addReply,
   getReplies,
   getNotifications,
-  markNotificationRead
+  markNotificationRead,
+  resolveNotice
 } = require("../controllers/noticeController");
 
 
