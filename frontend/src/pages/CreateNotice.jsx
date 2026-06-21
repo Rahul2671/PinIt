@@ -69,14 +69,7 @@ function CreateNotice() {
 
       const notice = response.data;
 
-      if (category === "Lost & Found") {
-        const result = await shareToWhatsAppGroup(notice);
-        alert(
-          result.mode === "group"
-            ? "Notice posted! Message copied — paste it in your WhatsApp group."
-            : "Notice posted! Opening WhatsApp to share."
-        );
-      } else if (category === "Events" && isTeamFinder) {
+      if (category === "Events" && isTeamFinder) {
         alert(
           "Team finder posted! Others can express interest or contact you on PinIt."
         );
