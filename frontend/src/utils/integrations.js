@@ -208,6 +208,24 @@ export function openContactLink(contactInfo, message) {
   return false;
 }
 
+export async function shareToWhatsAppGroup(notice) {
+
+  const payload = await prepareSharePayload(notice);
+
+  if(payload.hasGroup){
+    openWhatsAppGroup();
+    return {
+      mode:"group"
+    };
+  }
+
+  openDirectWhatsApp(payload.message);
+
+  return {
+    mode:"direct"
+  };
+}
+
 /* ---------------- LABELS ---------------- */
 
 export const TEAM_INTENT_LABELS = {
