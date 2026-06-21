@@ -759,6 +759,49 @@ message:error.message
 
 };
 
+const resolveNotice = async(req,res)=>{
+
+try{
+
+const id=req.params.id;
+const user_id=req.user.id;
+
+
+const result = await db.query(
+`
+UPDATE notices
+SET notice_status='resolved'
+WHERE id=$1 AND user_id=$2
+RETURNING *
+`,
+[
+id,
+user_id
+]
+);
+
+
+if(result.rows.length===0){
+
+return res.status(403).json({
+message:"Not authorized"
+});
+
+}
+
+
+res.json(result.rows[0]);
+
+
+}catch(error){
+
+res.status(500).json({
+message:error.message
+});
+
+}
+
+};
 
 
 module.exports={
@@ -775,5 +818,6 @@ addReply,
 getReplies,
 getNotifications,
 markNotificationRead,
-updateTeamStatus
+updateTeamStatus,
+resolveNotice
 };
