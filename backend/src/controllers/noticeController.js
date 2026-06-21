@@ -6,8 +6,7 @@ const noticeSelect = `
     users.name AS poster_name,
     users.email AS poster_email,
     COUNT(DISTINCT upvotes.id) AS upvotes,
-    COUNT(DISTINCT team_interests.id) AS interest_count,
-    BOOL_OR(team_interests.user_id = $1) AS interested
+    COUNT(DISTINCT team_interests.id) AS interest_count
   FROM notices
   LEFT JOIN users ON notices.user_id = users.id
   LEFT JOIN upvotes ON notices.id = upvotes.notice_id
@@ -106,8 +105,14 @@ const user_id = req.user.id;
 
 const result =
 await db.query(
-`${noticeSelect} ${noticeGroupBy}`,
-[user_id]
+`
+${noticeSelect},
+BOOL_OR(team_interests.user_id=$1) AS interested
+${noticeGroupBy}
+`,
+[
+user_id
+]
 );
 
 res.json(result.rows);
@@ -136,7 +141,8 @@ const {id}=req.params;
 const result =
 await db.query(
 `
-${noticeSelect}
+${noticeSelect},
+BOOL_OR(team_interests.user_id=$1) AS interested
 WHERE notices.id=$2
 ${noticeGroupBy}
 `,
@@ -178,12 +184,12 @@ const user_id=req.user.id;
 const result =
 await db.query(
 `
-${noticeSelect}
-WHERE notices.user_id=$2
+${noticeSelect},
+BOOL_OR(team_interests.user_id=$1) AS interested
+WHERE notices.user_id=$1
 ${noticeGroupBy}
 `,
 [
-user_id,
 user_id
 ]
 );
