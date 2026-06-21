@@ -6,7 +6,8 @@ const noticeSelect = `
     users.name AS poster_name,
     users.email AS poster_email,
     COUNT(DISTINCT upvotes.id) AS upvotes,
-    COUNT(DISTINCT team_interests.id) AS interest_count
+    COUNT(DISTINCT team_interests.id) AS interest_count,
+    BOOL_OR(team_interests.user_id = $1) AS interested
   FROM notices
   LEFT JOIN users ON notices.user_id = users.id
   LEFT JOIN upvotes ON notices.id = upvotes.notice_id
@@ -101,8 +102,13 @@ const getNotices = async(req,res)=>{
 
 try{
 
+const user_id = req.user.id;
+
 const result =
-await db.query(`${noticeSelect} ${noticeGroupBy}`);
+await db.query(
+`${noticeSelect} ${noticeGroupBy}`,
+[user_id]
+);
 
 res.json(result.rows);
 
@@ -131,10 +137,13 @@ const result =
 await db.query(
 `
 ${noticeSelect}
-WHERE notices.id=$1
+WHERE notices.id=$2
 ${noticeGroupBy}
 `,
-[id]
+[
+req.user.id,
+id
+]
 );
 
 
@@ -170,10 +179,13 @@ const result =
 await db.query(
 `
 ${noticeSelect}
-WHERE notices.user_id=$1
+WHERE notices.user_id=$2
 ${noticeGroupBy}
 `,
-[user_id]
+[
+user_id,
+user_id
+]
 );
 
 
