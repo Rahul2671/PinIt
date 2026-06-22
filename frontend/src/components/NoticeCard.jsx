@@ -269,24 +269,25 @@ error.response?.data?.message ||
 
 };
 
-const fetchInterests=async()=>{
+const fetchInterests = async()=>{
 
-if(!isOwner) return;
+if(!isOwner){
+  return;
+}
 
 const token = localStorage.getItem("token");
 
 if(!token){
-  alert("Login required");
   return;
 }
-  
+
 try{
 
-const res=await axios.get(
+const res = await axios.get(
 `${import.meta.env.VITE_API_URL}/api/notices/${id}/interests`,
 {
 headers:{
-Authorization:`Bearer ${localStorage.getItem("token")}`
+Authorization:`Bearer ${token}`
 }
 }
 );
@@ -296,7 +297,9 @@ setShowInterests(true);
 
 }catch(error){
 
+if(error.response?.status !== 401){
 console.log(error.response?.data);
+}
 
 }
 
