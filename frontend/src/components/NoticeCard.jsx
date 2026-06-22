@@ -269,9 +269,9 @@ error.response?.data?.message ||
 
 };
 
-const fetchInterests = async()=>{
+const fetchInterests=async()=>{
 
-if(!isOwner){
+if(Number(user_id) !== Number(currentUserId)){
   return;
 }
 
@@ -283,7 +283,7 @@ if(!token){
 
 try{
 
-const res = await axios.get(
+const res=await axios.get(
 `${import.meta.env.VITE_API_URL}/api/notices/${id}/interests`,
 {
 headers:{
@@ -297,7 +297,7 @@ setShowInterests(true);
 
 }catch(error){
 
-if(error.response?.status !== 401){
+if(error.response?.status !== 403){
 console.log(error.response?.data);
 }
 
