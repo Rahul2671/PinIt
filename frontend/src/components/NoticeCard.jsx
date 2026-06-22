@@ -24,6 +24,7 @@ title,
 category,
 community,
 description,
+created_at,
 upvotes: initialUpvotes,
 is_team_finder,
 event_name,
@@ -394,6 +395,13 @@ className="card-hover cursor-pointer flex flex-col flex-1"
 
 </h2>
 
+<p className="text-xs text-slate-400 mt-1">
+  Posted on {new Date(created_at).toLocaleDateString()} at{" "}
+  {new Date(created_at).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
+</p>
 
 {isTeamFinder &&
 
