@@ -271,7 +271,14 @@ error.response?.data?.message ||
 
 const fetchInterests=async()=>{
 
-console.log("FETCH INTERESTS CALLED", id);
+if(!isOwner) return;
+
+const token = localStorage.getItem("token");
+
+if(!token){
+  alert("Login required");
+  return;
+}
   
 try{
 
