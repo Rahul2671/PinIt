@@ -271,6 +271,8 @@ error.response?.data?.message ||
 
 const fetchInterests=async()=>{
 
+console.log("FETCH INTERESTS CALLED", id);
+  
 try{
 
 const res=await axios.get(
