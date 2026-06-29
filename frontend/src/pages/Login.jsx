@@ -19,7 +19,9 @@ function Login() {
       );
 
       localStorage.setItem("token", response.data.token);
-      
+      window.dispatchEvent(
+      new Event("authChange")
+      );
       navigate("/");
     } catch (error) {
       console.log(error);
