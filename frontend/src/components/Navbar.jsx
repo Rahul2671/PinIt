@@ -8,17 +8,51 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const token = localStorage.getItem("token");
+  const [token,setToken] = useState(
+    localStorage.getItem("token")
+  );
 
 
   const [notifications,setNotifications] = useState([]);
   const [showNotifications,setShowNotifications] = useState(false);
 
+  useEffect(()=>{
 
+  const updateToken = ()=>{
+
+    setToken(
+      localStorage.getItem("token")
+    );
+
+  };
+
+
+  window.addEventListener(
+    "storage",
+    updateToken
+  );
+
+
+  return ()=>{
+
+    window.removeEventListener(
+      "storage",
+      updateToken
+    );
+
+  };
+
+
+  },[]);
 
   const logout = () => {
+
     localStorage.removeItem("token");
+
+    setToken(null);
+
     navigate("/login");
+
   };
 
 
