@@ -17,42 +17,53 @@ function Navbar() {
   const [showNotifications,setShowNotifications] = useState(false);
 
   useEffect(()=>{
-
+  
+  
   const updateToken = ()=>{
-
-    setToken(
-      localStorage.getItem("token")
-    );
-
-  };
-
-
-  window.addEventListener(
-    "storage",
-    updateToken
+  
+  setToken(
+  localStorage.getItem("token")
   );
-
-
-  return ()=>{
-
-    window.removeEventListener(
-      "storage",
-      updateToken
-    );
-
+  
   };
-
-
+  
+  
+  
+  window.addEventListener(
+  "authChange",
+  updateToken
+  );
+  
+  
+  return ()=>{
+  
+  window.removeEventListener(
+  "authChange",
+  updateToken
+  );
+  
+  };
+  
+  
   },[]);
 
   const logout = () => {
 
-    localStorage.removeItem("token");
 
-    setToken(null);
-
-    navigate("/login");
-
+  localStorage.removeItem("token");
+  
+  
+  window.dispatchEvent(
+  new Event("authChange")
+  );
+  
+  
+  setToken(null);
+  
+  
+  navigate("/login");
+  
+  
   };
 
 
