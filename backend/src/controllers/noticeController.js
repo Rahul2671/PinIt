@@ -170,10 +170,39 @@ const user_id=req.user.id;
 const result =
 await db.query(
 `
-${noticeSelect},
+SELECT
+notices.*,
+users.name AS poster_name,
+users.email AS poster_email,
+
+COUNT(DISTINCT upvotes.id) AS upvotes,
+
+COUNT(DISTINCT team_interests.id) AS interest_count,
+
 BOOL_OR(team_interests.user_id=$1) AS interested
+
+FROM notices
+
+LEFT JOIN users 
+ON notices.user_id = users.id
+
+LEFT JOIN upvotes
+ON notices.id = upvotes.notice_id
+
+LEFT JOIN team_interests
+ON notices.id = team_interests.notice_id
+
+
 WHERE notices.user_id=$1
-${noticeGroupBy}
+
+
+GROUP BY 
+notices.id,
+users.name,
+users.email
+
+
+ORDER BY notices.created_at DESC
 `,
 [
 user_id
@@ -186,6 +215,9 @@ res.json(result.rows);
 
 }catch(error){
 
+console.log("MY NOTICES ERROR:",error);
+
+
 res.status(500).json({
 message:error.message
 });
@@ -193,7 +225,6 @@ message:error.message
 }
 
 };
-
 
 
 
