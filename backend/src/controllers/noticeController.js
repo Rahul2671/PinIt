@@ -83,7 +83,60 @@ const createNotice = async (req, res) => {
     );
 
 
-    res.status(201).json(result.rows[0]);
+    const notice = result.rows[0];
+
+
+
+    // 🔔 SUBSCRIBER NOTIFICATION
+
+    const noticeText =
+      `${title} ${description} ${category} ${event_name || ""}`
+      .toLowerCase();
+
+
+
+    const subscribers = await db.query(
+      `
+      SELECT user_id
+      FROM subscriptions
+      WHERE $1 ILIKE '%' || keyword || '%'
+      `,
+      [
+        noticeText
+      ]
+    );
+
+
+
+    for(const sub of subscribers.rows){
+
+
+      // don't notify the person who posted
+      if(Number(sub.user_id) !== Number(user_id)){
+
+
+        await db.query(
+          `
+          INSERT INTO notifications
+          (user_id, notice_id, sender_id, message)
+          VALUES($1,$2,$3,$4)
+          `,
+          [
+            sub.user_id,
+            notice.id,
+            user_id,
+            `New notice matching your interest: ${title}`
+          ]
+        );
+
+
+      }
+
+    }
+
+
+
+    res.status(201).json(notice);
 
 
   } catch(error){
