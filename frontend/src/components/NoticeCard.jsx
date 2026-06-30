@@ -76,44 +76,7 @@ const isTeamFull=status==="full";
 
 useEffect(()=>{
 
-const checkInterest = async()=>{
-
-try{
-
-const res = await axios.get(
-`${import.meta.env.VITE_API_URL}/api/notices/${id}/interests`,
-{
-headers:{
-Authorization:`Bearer ${localStorage.getItem("token")}`
-}
-}
-);
-
-
-const exists = res.data.some(
-user => Number(user.id) === Number(currentUserId)
-);
-
-
-setInterested(exists);
-
-
-}catch(error){
-
-console.log(error);
-
-}
-
-};
-
-
-if(isTeamFinder && !isOwner){
-checkInterest();
-}
-
-
 },[]);
-
 
 
 
