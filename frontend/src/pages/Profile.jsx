@@ -8,6 +8,9 @@ function Profile() {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [subscriptions,setSubscriptions] = useState([]);
+  const [keyword,setKeyword] = useState("");
+
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -36,6 +39,17 @@ function Profile() {
       );
 
       setNotices(myNotices);
+      const subResponse = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/users/subscriptions`,
+      {
+      headers:{
+      Authorization:`Bearer ${token}`
+      }
+      }
+      );
+      
+      
+      setSubscriptions(subResponse.data);
     } catch (error) {
       console.log(error);
     } finally {
@@ -43,6 +57,75 @@ function Profile() {
     }
   };
 
+  const addSubscription = async()=>{
+
+
+  if(!keyword.trim()) return;
+  
+  
+  try{
+  
+  
+  await axios.post(
+  `${import.meta.env.VITE_API_URL}/api/users/subscribe`,
+  {
+  keyword
+  },
+  {
+  headers:{
+  Authorization:`Bearer ${localStorage.getItem("token")}`
+  }
+  }
+  );
+  
+  
+  setKeyword("");
+  
+  fetchProfile();
+  
+  
+  }
+  catch(error){
+  
+  console.log(error);
+  
+  }
+  
+  
+  };
+  
+  
+  
+  
+  const removeSubscription = async(word)=>{
+  
+  
+  try{
+  
+  
+  await axios.delete(
+  `${import.meta.env.VITE_API_URL}/api/users/subscribe/${word}`,
+  {
+  headers:{
+  Authorization:`Bearer ${localStorage.getItem("token")}`
+  }
+  }
+  );
+  
+  
+  fetchProfile();
+  
+  
+  }
+  catch(error){
+  
+  console.log(error);
+  
+  }
+  
+  
+  };
+  
   const initials = user?.name
     ?.split(" ")
     .map((n) => n[0])
@@ -116,6 +199,98 @@ function Profile() {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="card mb-10">
+
+      <h2 className="text-xl font-bold text-slate-900">
+      Your subscriptions
+      </h2>
+      
+      
+      <p className="mt-1 text-sm text-slate-500">
+      Get notifications for topics you follow
+      </p>
+      
+      
+      
+      <div className="mt-4 flex gap-3">
+      
+      
+      <input
+      
+      value={keyword}
+      
+      onChange={(e)=>setKeyword(e.target.value)}
+      
+      placeholder="coding, ai, hackathon..."
+      
+      className="flex-1 rounded-xl border px-4 py-2"
+      
+      />
+      
+      
+      
+      <button
+      
+      onClick={addSubscription}
+      
+      className="btn-primary"
+      
+      >
+      
+      Subscribe
+      
+      </button>
+      
+      
+      </div>
+      
+      
+      
+      
+      
+      <div className="mt-4 flex flex-wrap gap-2">
+      
+      
+      {subscriptions.map((sub)=>(
+      
+      
+      <span
+      
+      key={sub.id}
+      
+      className="rounded-full bg-indigo-50 px-4 py-2 text-sm text-indigo-700"
+      
+      >
+      
+      
+      {sub.keyword}
+      
+      
+      <button
+      
+      onClick={()=>removeSubscription(sub.keyword)}
+      
+      className="ml-2 text-red-500"
+      
+      >
+      
+      ×
+      
+      
+      </button>
+      
+      
+      </span>
+      
+      
+      ))}
+      
+      
+      </div>
+      
+      
       </div>
 
       <div className="mb-5 flex items-center justify-between">
